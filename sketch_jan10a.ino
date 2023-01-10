@@ -62,12 +62,12 @@ void reconnect() {
     clientId += String(random(0xffff), HEX);
     if (client.connect(clientId.c_str())) {
       Serial.println("Terhubung");
-      client.publish(id+"LEDTEST2", "hello world");
-      client.subscribe(id+"LEDTEST1");
+      client.publish("LEDTEST2", "hello world");
+      client.subscribe("LEDTEST1");
     } else {
-      Serial.print("failed, rc=");
+      Serial.print("Gagal, rc=");
       Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
+      Serial.println(" Coba lagi dalam 5 detik");
       delay(5000);
     }
   }
@@ -86,6 +86,18 @@ int hitungJarak(char trig,char echo){
   return jarak;
 }
 
+class lineChart{
+  public:
+    std::vector<int> data;
+    void input(int dataInput){
+      data.push_back(dataInput);
+    }
+    void pop(){
+      data.erase(1);
+    }
+
+};
+
 void setup() {
   pinMode(D2, OUTPUT);
   Serial.begin(115200);
@@ -93,6 +105,7 @@ void setup() {
   client.setServer(mqttServer, 1883);
   client.setCallback(callback);
 }
+
 
 void loop() {
 
@@ -102,10 +115,10 @@ void loop() {
   client.loop();
 
   unsigned long now = millis();
-  if (now - lastMsg > 300) {
+  if (now - lastMsg > 1000) {
     lastMsg = now;
     ++value;
-    snprintf (msg, MSG_BUFFER_SIZE, "Hallo Sayangku Zulfa Ke-%ld", value);
+    snprintf (msg, MSG_BUFFER_SIZE, "[%ld, %ld, %ld]", value,value*10,value/10);
     Serial.print("Publish message: ");
     Serial.println(msg);
     client.publish("LEDTEST2", msg);
